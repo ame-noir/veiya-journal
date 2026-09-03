@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>写新记录 - Veiya 的生活记录</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>写新记录</h1>
+      <a href="/" class="btn secondary">返回首页</a>
+    </header>
+
+    <form id="entryForm" class="form">
+      <div class="form-group">
+        <label>管理密码</label>
+        <input type="password" id="password" required placeholder="输入管理密码">
+      </div>
+
+      <div class="form-group">
+        <label>日期</label>
+        <input type="date" id="entry_date" required>
+      </div>
+
+      <div class="form-group">
+        <label>标题</label>
+        <input type="text" id="title" required placeholder="今天的标题">
+      </div>
+
+      <div class="form-group">
+        <label>内容</label>
+        <textarea id="content" rows="6" placeholder="写点什么吧..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>照片 / 视频（可多选）</label>
+        <input type="file" id="files" multiple accept="image/*,video/*">
+      </div>
+
+      <button type="submit" class="btn">发布</button>
+      <div id="message" class="message"></div>
+    </form>
+  </div>
+
+  <script>
+    // 默认填今天的日期
+    document.getElementById('entry_date').valueAsDate = new Date();
+
+    document.getElementById('entryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = document.getElementById('message');
+      message.textContent = '发布中...';
+      message.className = 'message';
+
+      const formData = new FormData();
+      formData.append('password', document.getElementById('password').value);
+      formData.append('title', document.getElementById('title').value);
+      formData.append('content', document.getElementById('content').value);
+      formData.append('entry_date', document.getElementById('entry_date').value);
+
+      const files = document.getElementById('files').files;
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      try {
+        const res = await fetch('/api/entries', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          message.textContent = '发布成功！正在跳转...';
+          message.className = 'message success';
+          setTimeout(() => location.href = '/', 1200);
+        } else {
+          message.textContent = result.error || '发布失败';
+          message.className = 'message error';
+        }
+      } catch (err) {
+        message.textContent = '网络错误，请重试';
+        message.className = 'message error';
+      }
+    });
+  </script>
+</body>
+</html>
