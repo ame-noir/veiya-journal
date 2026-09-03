@@ -32,26 +32,11 @@
         }
 
         container.innerHTML = data.map(entry => {
-          let mediaHtml = '';
-          if (entry.media_keys) {
-            try {
-              const keys = JSON.parse(entry.media_keys);
-              mediaHtml = keys.map(key => {
-                if (key.match(/\.(mp4|webm|mov)$/i)) {
-                  return `<video controls src="/media/${key}"></video>`;
-                } else {
-                  return `<img src="/media/${key}" alt="照片" loading="lazy">`;
-                }
-              }).join('');
-            } catch (e) {}
-          }
-
           return `
             <article class="entry">
               <div class="entry-date">${entry.entry_date}</div>
               <h2>${escapeHtml(entry.title)}</h2>
               <div class="entry-content">${escapeHtml(entry.content || '').replace(/\n/g, '<br>')}</div>
-              ${mediaHtml ? `<div class="media">${mediaHtml}</div>` : ''}
             </article>
           `;
         }).join('');
