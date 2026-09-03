@@ -1,0 +1,23 @@
+export async function onRequestGet(context) {
+  const { request, env, params } = context;
+  
+  // 获取路径，例如 media/xxx.jpg → xxx.jpg
+  const key = params.path;
+
+  if (!key) {
+    return new Response('Not found', { status: 404 });
+  }
+
+  const object = await env.MEDIA.get(key);
+
+  if (!object) {
+    return new Response('Not found', { status: 404 });
+  }
+
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set('etag', object.httpEtag);
+  headers.set('Cache-Control', 'public, max-age=31536000');
+
+  return new Response(object.body, { headers });
+}
