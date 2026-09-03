@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veiya 的生活记录</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Veiya 的生活记录</h1>
+      <p class="subtitle">记录生活里的小瞬间</p>
+      <a href="/add.html" class="btn">写新记录</a>
+    </header>
+
+    <main id="entries">
+      <div class="loading">加载中...</div>
+    </main>
+  </div>
+
+  <script>
+    async function loadEntries() {
+      try {
+        const res = await fetch('/api/entries');
+        const data = await res.json();
+        const container = document.getElementById('entries');
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="empty">还没有记录，去写第一条吧～</div>';
+          return;
+        }
+
+        container.innerHTML = data.map(entry => {
+          let mediaHtml = '';
+          if (entry.media_keys) {
+            try {
+              const keys = JSON.parse(entry.media_keys);
+              mediaHtml = keys.map(key => {
+                if (key.match(/\.(mp4|webm|mov)$/i)) {
+                  return `<video controls src="/media/${key}"></video>`;
+                } else {
+                  return `<img src="/media/${key}" alt="照片" loading="lazy">`;
+                }
+              }).join('');
+            } catch (e) {}
+          }
+
+          return `
+            <article class="entry">
+              <div class="entry-date">${entry.entry_date}</div>
+              <h2>${escapeHtml(entry.title)}</h2>
+              <div class="entry-content">${escapeHtml(entry.content || '').replace(/\n/g, '<br>')}</div>
+              ${mediaHtml ? `<div class="media">${mediaHtml}</div>` : ''}
+            </article>
+          `;
+        }).join('');
+      } catch (err) {
+        document.getElementById('entries').innerHTML = '<div class="empty">加载失败，请稍后刷新</div>';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    loadEntries();
+  </script>
+</body>
+</html>
