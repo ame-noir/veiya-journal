@@ -1,14 +1,9 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "veiya-journal",
-  "main": "_worker.js",
+  "main": "worker.js",
   "compatibility_date": "2026-08-31",
   "assets": {
     "directory": ".",
-    "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
-  },
-  "observability": {
-    "enabled": true
+    "binding": "ASSETS"
   }
 }
